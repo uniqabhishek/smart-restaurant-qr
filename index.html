@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>RestoFlow • Smart QR Restaurant Dine-In & Kitchen Ecosystem</title>
     <meta name="description" content="One system for your guests, kitchen, and staff. QR Dine-In Ordering, Live Kitchen Display, Floor Map, Waiter Call, Bill Splitting & Analytics." />
+    <meta name="theme-color" content="#f97316" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
     <!-- Google Fonts Inter & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,5 +17,12 @@
   <body class="bg-slate-950 text-slate-100 antialiased selection:bg-orange-500 selection:text-white font-['Plus_Jakarta_Sans',sans-serif]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

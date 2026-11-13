@@ -29,6 +29,7 @@ import { ChefInterface } from './components/chef/ChefInterface';
 import { OwnerInterface } from './components/owner/OwnerInterface';
 import { AuthModal } from './components/auth/AuthModal';
 import { CustomerHistoryModal } from './components/customer/CustomerHistoryModal';
+import { DemoApkModal } from './components/DemoApkModal';
 
 export const App: React.FC = () => {
   // Auth state
@@ -37,6 +38,7 @@ export const App: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalInitialRole, setAuthModalInitialRole] = useState<UserRole>('customer');
   const [isCustomerHistoryOpen, setIsCustomerHistoryOpen] = useState(false);
+  const [isDemoApkOpen, setIsDemoApkOpen] = useState(false);
 
   // Table selection & responsive phone frame
   const [selectedTable, setSelectedTable] = useState<TableId>(4); // Default Table 4 from reel
@@ -343,6 +345,7 @@ export const App: React.FC = () => {
         isPhoneFrame={isPhoneFrame}
         onTogglePhoneFrame={() => setIsPhoneFrame(!isPhoneFrame)}
         onOpenCustomerHistory={() => setIsCustomerHistoryOpen(true)}
+        onOpenDemoApk={() => setIsDemoApkOpen(true)}
       />
 
       {/* Main Dedicated Interfaces by Role */}
@@ -428,6 +431,16 @@ export const App: React.FC = () => {
         onClose={() => setIsCustomerHistoryOpen(false)}
         user={currentUser}
         orders={orders.filter((o) => o.isPaid || o.status === 'served')}
+      />
+
+      {/* Demo APK & Pitch Deck Modal */}
+      <DemoApkModal
+        isOpen={isDemoApkOpen}
+        onClose={() => setIsDemoApkOpen(false)}
+        onQuickLogin={(role) => {
+          setActiveRole(role);
+          if (role === 'customer') setSelectedTable(4);
+        }}
       />
     </div>
   );

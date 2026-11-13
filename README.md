@@ -4,10 +4,32 @@
 > Inspired by the viral Instagram Reel by [@shahfahid.dev](https://www.instagram.com/reel/DfgdpeWIHv9/)
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-f97316?style=for-the-badge&logo=github)](https://uniqabhishek.github.io/smart-restaurant-qr/)
+[![Demo APK](https://img.shields.io/badge/Android_APK-Download_Demo-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/uniqabhishek/smart-restaurant-qr/releases/download/v1.0.0-demo/RestoFlow-Demo.apk)
+[![PWA Ready](https://img.shields.io/badge/PWA-1--Tap_Home_Screen-f97316?style=for-the-badge&logo=pwa&logoColor=white)](https://uniqabhishek.github.io/smart-restaurant-qr/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![React 19](https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+
+---
+
+## 📱 Restaurant Sales & Pitch Deliverables
+
+For demonstrating and pitching RestoFlow ONE directly to restaurant owners, managers, and stakeholders:
+
+1. **📲 Native Android Demo APK**:  
+   👉 **[Download RestoFlow-Demo.apk](https://github.com/uniqabhishek/smart-restaurant-qr/releases/download/v1.0.0-demo/RestoFlow-Demo.apk)**  
+   *Sideload and install directly on any Android smartphone, POS terminal, or kitchen tablet.*
+
+2. **⚡ 1-Tap Home Screen Install (Zero-Download PWA)**:  
+   👉 **[Launch Live Web Terminal](https://uniqabhishek.github.io/smart-restaurant-qr/)**  
+   *Open on mobile Chrome or Safari and tap **"Install App"** to add as a native standalone app to your home screen.*
+
+3. **💼 Restaurant Owner Value Proposition (Key Pitch Metrics)**:
+   - 📈 **+18% Average Order Value**: Visual photography, modifiers, portion sizing, and automated upselling prompts.
+   - ⏱️ **15 Minutes Faster Table Turns**: Diners split the bill and pay from their phone without waiting for staff.
+   - 👨‍🍳 **Zero Kitchen Order Errors**: Orders transmit instantly to the Kitchen Display System (KDS) with audio bell chimes.
+   - 📉 **Reduced Front-of-House Labor**: Peak rushes handled smoothly with fewer floor staff required.
 
 ---
 

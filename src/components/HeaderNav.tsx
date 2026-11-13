@@ -37,6 +37,7 @@ interface HeaderNavProps {
   isPhoneFrame: boolean;
   onTogglePhoneFrame: () => void;
   onOpenCustomerHistory: () => void;
+  onOpenDemoApk: () => void;
 }
 
 export const HeaderNav: React.FC<HeaderNavProps> = ({
@@ -55,6 +56,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   isPhoneFrame,
   onTogglePhoneFrame,
   onOpenCustomerHistory,
+  onOpenDemoApk,
 }) => {
   return (
     <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white px-3 sm:px-6 py-2.5 transition-all">
@@ -82,6 +84,13 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
           {/* Mobile Right Quick Controls */}
           <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={onOpenDemoApk}
+              className="p-1.5 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold"
+              title="Download Demo APK & Pitch Deck"
+            >
+              <Smartphone className="w-4 h-4" />
+            </button>
             {pendingCallsCount > 0 && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
                 <Bell className="w-3.5 h-3.5" /> {pendingCallsCount}
@@ -219,6 +228,16 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             ) : (
               <VolumeX className="w-4 h-4 text-slate-500" />
             )}
+          </button>
+
+          {/* Demo APK & Pitch Deck Button */}
+          <button
+            onClick={onOpenDemoApk}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 hover:text-orange-300 border border-orange-500/30 text-xs font-bold transition-all shadow-sm active:scale-95"
+            title="Download Demo APK & Pitch Guide"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-orange-400" />
+            <span className="hidden xl:inline">Demo APK</span>
           </button>
 
           {/* User Auth Profile / Login Button */}
