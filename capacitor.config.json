@@ -1,0 +1,9 @@
+{
+  "appId": "com.uniqabhishek.restoflow",
+  "appName": "RestoFlow ONE",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
