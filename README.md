@@ -11,6 +11,18 @@
 
 ---
 
+## 🔐 Multi-Role Authentication & 3 Dedicated Interfaces
+
+RestoFlow ONE features dedicated interfaces and an authentication system (Login & Sign Up) supporting three roles:
+
+| Role | Interface Highlights | 1-Click Demo Account |
+| :--- | :--- | :--- |
+| **👑 Restaurant Owner** | Full Executive Command Center, live revenue ticker, table occupancy analytics, interactive floor radar, supervisor kitchen monitor, menu item price editor & stock toggle, table QR card studio. | **`owner@resto.com`** / `owner123` |
+| **👨‍🍳 Kitchen Chef** | Focused, high-efficiency Kitchen Display System (KDS) Kanban board (`NEW`, `COOKING`, `READY`, `SERVED`), preparation countdown timers, dish allergen warnings, special requests, and native procedural audio bells. | **`chef@resto.com`** / `chef123` |
+| **📱 Customer** | Seamless mobile table dining (`Table 1–8`), digital menu with allergen filters and spice level gauges, live order progress stepper, complimentary Wi-Fi password copy, waiter call button, bill splitting, multi-gateway payments, and loyalty rewards points. | **`customer@resto.com`** / `cust123` |
+
+---
+
 ## 🌟 The 6-Step Workflow Demonstrated in the Reel
 
 | Step | Feature | Description |

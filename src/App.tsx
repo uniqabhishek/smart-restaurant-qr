@@ -8,6 +8,8 @@ import {
   CartItem,
   OrderStatus
 } from './types/restaurant';
+import { User, UserRole } from './types/auth';
+import { getCurrentUser, logoutUser } from './utils/auth';
 import { 
   getStoredOrders, 
   saveStoredOrders, 
@@ -21,17 +23,23 @@ import {
   subscribeToSync
 } from './utils/storage';
 import { sounds } from './utils/audio';
-import { HeaderNav, AppViewMode } from './components/HeaderNav';
+import { HeaderNav } from './components/HeaderNav';
 import { GuestView } from './components/guest/GuestView';
-import { KitchenDisplay } from './components/kds/KitchenDisplay';
-import { FloorMap } from './components/floor/FloorMap';
-import { ManagerDashboard } from './components/manager/ManagerDashboard';
-import { QRCodeStation } from './components/qr/QRCodeStation';
+import { ChefInterface } from './components/chef/ChefInterface';
+import { OwnerInterface } from './components/owner/OwnerInterface';
+import { AuthModal } from './components/auth/AuthModal';
+import { CustomerHistoryModal } from './components/customer/CustomerHistoryModal';
 
 export const App: React.FC = () => {
-  // Navigation & View Mode
-  const [currentView, setCurrentView] = useState<AppViewMode>('guest');
-  const [selectedTable, setSelectedTable] = useState<TableId>(4); // Default to Table 4 as shown in reel
+  // Auth state
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [activeRole, setActiveRole] = useState<UserRole>('customer');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalInitialRole, setAuthModalInitialRole] = useState<UserRole>('customer');
+  const [isCustomerHistoryOpen, setIsCustomerHistoryOpen] = useState(false);
+
+  // Table selection & responsive phone frame
+  const [selectedTable, setSelectedTable] = useState<TableId>(4); // Default Table 4 from reel
   const [isPhoneFrame, setIsPhoneFrame] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -41,8 +49,14 @@ export const App: React.FC = () => {
   const [waiterCalls, setWaiterCalls] = useState<WaiterCall[]>([]);
   const [reviews, setReviews] = useState<ReviewSubmission[]>([]);
 
-  // Initial load & URL query param parsing
+  // Initial load
   useEffect(() => {
+    const loadedUser = getCurrentUser();
+    if (loadedUser) {
+      setCurrentUser(loadedUser);
+      setActiveRole(loadedUser.role);
+    }
+
     setOrders(getStoredOrders());
     setTables(getStoredTables());
     setWaiterCalls(getStoredWaiterCalls());
@@ -55,19 +69,19 @@ export const App: React.FC = () => {
         const parsed = parseInt(tableParam, 10);
         if (parsed >= 1 && parsed <= 8) {
           setSelectedTable(parsed as TableId);
-          setCurrentView('guest');
+          setActiveRole('customer');
         }
       }
-      const viewParam = params.get('view');
-      if (viewParam && ['guest', 'kitchen', 'floor', 'manager', 'qr_station'].includes(viewParam)) {
-        setCurrentView(viewParam as AppViewMode);
+      const roleParam = params.get('role');
+      if (roleParam && ['customer', 'chef', 'owner'].includes(roleParam)) {
+        setActiveRole(roleParam as UserRole);
       }
     }
   }, []);
 
   // Multi-tab real-time reactivity
   useEffect(() => {
-    const unsubscribe = subscribeToSync((action, _payload) => {
+    const unsubscribe = subscribeToSync((action) => {
       setOrders(getStoredOrders());
       setTables(getStoredTables());
       setWaiterCalls(getStoredWaiterCalls());
@@ -83,7 +97,7 @@ export const App: React.FC = () => {
     return () => unsubscribe();
   }, [soundEnabled]);
 
-  // Active order for the selected table in Guest View
+  // Active order for the selected table in Customer View
   const activeOrderForSelectedTable = orders.find(
     (o) => o.tableId === selectedTable && o.status !== 'served'
   ) || null;
@@ -93,7 +107,7 @@ export const App: React.FC = () => {
     (c) => c.tableId === selectedTable && c.status === 'pending'
   ) || null;
 
-  // Handler: Place new order from Guest View
+  // Handler: Customer places new order
   const handlePlaceOrder = (cartItems: CartItem[]) => {
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const tax = Math.round(subtotal * 0.05);
@@ -152,7 +166,7 @@ export const App: React.FC = () => {
     saveStoredOrders(updatedOrders);
   };
 
-  // Handler: Guest calls waiter
+  // Handler: Customer calls waiter
   const handleCallWaiter = (reason: string) => {
     const newCall: WaiterCall = {
       id: `wc-${Date.now()}`,
@@ -173,7 +187,7 @@ export const App: React.FC = () => {
     saveStoredTables(updatedTables);
   };
 
-  // Handler: Staff acknowledges waiter call on Floor Map
+  // Handler: Staff acknowledges waiter call
   const handleAcknowledgeCall = (callId: string, tableId: TableId) => {
     const updatedCalls = waiterCalls.map((c) =>
       c.id === callId ? { ...c, status: 'acknowledged' as const } : c
@@ -229,7 +243,7 @@ export const App: React.FC = () => {
     saveStoredReviews(updatedReviews);
   };
 
-  // Handler: Add test order for Kitchen KDS demo
+  // Handler: Add test order for Kitchen KDS
   const handleAddNewTestOrder = () => {
     const randomTable = (Math.floor(Math.random() * 8) + 1) as TableId;
     const testOrder: OrderTicket = {
@@ -246,7 +260,7 @@ export const App: React.FC = () => {
           price: 2500,
           spiceLevel: 2,
           allergens: ['Dairy'],
-          specialInstructions: 'Extra crispy naan',
+          specialInstructions: 'Extra crispy naan, well garnished',
         },
         {
           menuItemId: 'dish-6',
@@ -291,6 +305,19 @@ export const App: React.FC = () => {
     saveStoredTables(updatedTables);
   };
 
+  // Handler: Auth Login / Signup Success
+  const handleAuthSuccess = (user: User) => {
+    setCurrentUser(user);
+    setActiveRole(user.role);
+  };
+
+  // Handler: User Logout
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+    setActiveRole('customer');
+  };
+
   const activeOrdersCount = orders.filter((o) => o.status !== 'served').length;
   const pendingCallsCount = waiterCalls.filter((c) => c.status === 'pending').length;
 
@@ -298,8 +325,14 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
       {/* Top Controller Header */}
       <HeaderNav
-        currentView={currentView}
-        onSelectView={setCurrentView}
+        currentUser={currentUser}
+        onOpenAuth={(role) => {
+          if (role) setAuthModalInitialRole(role);
+          setIsAuthModalOpen(true);
+        }}
+        onLogout={handleLogout}
+        activeRole={activeRole}
+        onSelectRole={setActiveRole}
         selectedTable={selectedTable}
         onSelectTable={setSelectedTable}
         activeOrdersCount={activeOrdersCount}
@@ -309,11 +342,13 @@ export const App: React.FC = () => {
         onToggleSound={() => setSoundEnabled(!soundEnabled)}
         isPhoneFrame={isPhoneFrame}
         onTogglePhoneFrame={() => setIsPhoneFrame(!isPhoneFrame)}
+        onOpenCustomerHistory={() => setIsCustomerHistoryOpen(true)}
       />
 
-      {/* Main Body Viewport */}
+      {/* Main Dedicated Interfaces by Role */}
       <main className="flex-1">
-        {currentView === 'guest' && (
+        {/* 1. CUSTOMER INTERFACE */}
+        {activeRole === 'customer' && (
           <GuestView
             tableId={selectedTable}
             activeOrder={activeOrderForSelectedTable}
@@ -326,50 +361,74 @@ export const App: React.FC = () => {
           />
         )}
 
-        {currentView === 'kitchen' && (
-          <KitchenDisplay
+        {/* 2. KITCHEN CHEF INTERFACE */}
+        {activeRole === 'chef' && (
+          <ChefInterface
+            user={currentUser || {
+              id: 'chef-guest',
+              name: 'Chef Tariq Jamil',
+              email: 'chef@resto.com',
+              role: 'chef',
+              station: 'Head Chef • Karahi & Tandoor Station',
+              createdAt: Date.now()
+            }}
             orders={orders}
             onUpdateOrderStatus={handleUpdateOrderStatus}
             onAddNewTestOrder={handleAddNewTestOrder}
+            onLogout={handleLogout}
+            soundEnabled={soundEnabled}
+            onToggleSound={() => setSoundEnabled(!soundEnabled)}
           />
         )}
 
-        {currentView === 'floor' && (
-          <FloorMap
+        {/* 3. OWNER INTERFACE */}
+        {activeRole === 'owner' && (
+          <OwnerInterface
+            user={currentUser || {
+              id: 'owner-guest',
+              name: 'Shah Fahid (Owner)',
+              email: 'owner@resto.com',
+              role: 'owner',
+              restaurantName: 'The Royal Grand Feast',
+              createdAt: Date.now()
+            }}
+            orders={orders}
             tables={tables}
             waiterCalls={waiterCalls}
-            orders={orders}
+            reviews={reviews}
             onAcknowledgeCall={handleAcknowledgeCall}
-            onSelectTableForGuestView={(tId) => {
-              setSelectedTable(tId);
-              setCurrentView('guest');
-            }}
+            onClearTable={handleClearTable}
             onTriggerTestCall={(tId) => {
               setSelectedTable(tId);
               handleCallWaiter('Call Waiter');
               sounds.playWaiterAlert();
             }}
-            onClearTable={handleClearTable}
-          />
-        )}
-
-        {currentView === 'manager' && (
-          <ManagerDashboard
-            orders={orders}
-            tables={tables}
-            reviews={reviews}
-          />
-        )}
-
-        {currentView === 'qr_station' && (
-          <QRCodeStation
-            onOpenTable={(tId) => {
+            onOpenTableAsGuest={(tId) => {
               setSelectedTable(tId);
-              setCurrentView('guest');
+              setActiveRole('customer');
             }}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
+            onAddNewTestOrder={handleAddNewTestOrder}
+            onLogout={handleLogout}
           />
         )}
       </main>
+
+      {/* Auth Modal (Login & Signup) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+        initialRole={authModalInitialRole}
+      />
+
+      {/* Customer History & Rewards Modal */}
+      <CustomerHistoryModal
+        isOpen={isCustomerHistoryOpen}
+        onClose={() => setIsCustomerHistoryOpen(false)}
+        user={currentUser}
+        orders={orders.filter((o) => o.isPaid || o.status === 'served')}
+      />
     </div>
   );
 };

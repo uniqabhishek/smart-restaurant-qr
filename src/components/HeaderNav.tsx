@@ -9,15 +9,24 @@ import {
   Bell,
   Volume2,
   VolumeX,
-  ExternalLink
+  User as UserIcon,
+  LogOut,
+  LogIn,
+  Crown,
+  ChefHat,
+  Award
 } from 'lucide-react';
 import { TableId } from '../types/restaurant';
+import { User, UserRole } from '../types/auth';
 
-export type AppViewMode = 'guest' | 'kitchen' | 'floor' | 'manager' | 'qr_station';
+export type AppViewMode = 'customer' | 'chef' | 'owner';
 
 interface HeaderNavProps {
-  currentView: AppViewMode;
-  onSelectView: (view: AppViewMode) => void;
+  currentUser: User | null;
+  onOpenAuth: (role?: UserRole) => void;
+  onLogout: () => void;
+  activeRole: UserRole;
+  onSelectRole: (role: UserRole) => void;
   selectedTable: TableId;
   onSelectTable: (table: TableId) => void;
   activeOrdersCount: number;
@@ -27,11 +36,15 @@ interface HeaderNavProps {
   onToggleSound: () => void;
   isPhoneFrame: boolean;
   onTogglePhoneFrame: () => void;
+  onOpenCustomerHistory: () => void;
 }
 
 export const HeaderNav: React.FC<HeaderNavProps> = ({
-  currentView,
-  onSelectView,
+  currentUser,
+  onOpenAuth,
+  onLogout,
+  activeRole,
+  onSelectRole,
   selectedTable,
   onSelectTable,
   activeOrdersCount,
@@ -41,6 +54,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onToggleSound,
   isPhoneFrame,
   onTogglePhoneFrame,
+  onOpenCustomerHistory,
 }) => {
   return (
     <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white px-3 sm:px-6 py-2.5 transition-all">
@@ -57,115 +71,100 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                   RestoFlow <span className="text-orange-500 font-black">ONE</span>
                 </span>
                 <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-full">
-                  Smart QR Ecosystem
+                  Multi-Role Portal
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 hidden sm:block">
-                One system for guests, kitchen & staff
+                Customer QR • Kitchen Chef KDS • Owner Command Center
               </p>
             </div>
           </div>
 
-          {/* Mobile quick badges */}
+          {/* Mobile Right Quick Controls */}
           <div className="flex items-center gap-2 md:hidden">
             {pendingCallsCount > 0 && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
                 <Bell className="w-3.5 h-3.5" /> {pendingCallsCount}
               </span>
             )}
-            <button
-              onClick={onToggleSound}
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-              title="Toggle Audio"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            {currentUser ? (
+              <button
+                onClick={onLogout}
+                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs"
+                title="Log Out"
+              >
+                <LogOut className="w-4 h-4 text-red-400" />
+              </button>
+            ) : (
+              <button
+                onClick={() => onOpenAuth()}
+                className="px-2.5 py-1 rounded-lg bg-orange-500 text-white text-xs font-bold"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
 
-        {/* View Mode Switcher Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-xl border border-slate-800/80 overflow-x-auto w-full md:w-auto scrollbar-none justify-start md:justify-center">
+        {/* 3 Dedicated Role Interfaces Switcher */}
+        <div className="flex items-center gap-1.5 p-1 bg-slate-950/90 rounded-xl border border-slate-800 overflow-x-auto w-full md:w-auto scrollbar-none justify-start md:justify-center">
+          {/* 1. Customer Role */}
           <button
-            onClick={() => onSelectView('guest')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-              currentView === 'guest'
+            onClick={() => onSelectRole('customer')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+              activeRole === 'customer'
                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span>Guest Table</span>
+            <span>Customer QR</span>
             <span className="ml-1 px-1.5 py-0.2 text-[10px] bg-black/30 rounded font-mono">T{selectedTable}</span>
           </button>
 
+          {/* 2. Kitchen Chef Role */}
           <button
-            onClick={() => onSelectView('kitchen')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-              currentView === 'kitchen'
+            onClick={() => onSelectRole('chef')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+              activeRole === 'chef'
                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <UtensilsCrossed className="w-3.5 h-3.5" />
-            <span>Kitchen KDS</span>
+            <ChefHat className="w-3.5 h-3.5" />
+            <span>Kitchen Chef</span>
             {activeOrdersCount > 0 && (
               <span className={`px-1.5 py-0.2 text-[10px] rounded-full font-bold ${
-                currentView === 'kitchen' ? 'bg-white text-orange-600' : 'bg-orange-500/20 text-orange-400'
+                activeRole === 'chef' ? 'bg-white text-orange-600' : 'bg-orange-500/20 text-orange-400'
               }`}>
                 {activeOrdersCount}
               </span>
             )}
           </button>
 
+          {/* 3. Owner Role */}
           <button
-            onClick={() => onSelectView('floor')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all relative ${
-              currentView === 'floor'
+            onClick={() => onSelectRole('owner')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all relative ${
+              activeRole === 'owner'
                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <MapPin className="w-3.5 h-3.5" />
-            <span>Floor Map</span>
-            {pendingCallsCount > 0 && (
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute -top-0.5 -right-0.5" />
-            )}
+            <Crown className="w-3.5 h-3.5 text-amber-300" />
+            <span>Owner Portal</span>
             {pendingCallsCount > 0 && (
               <span className="px-1.5 py-0.2 text-[10px] rounded-full font-bold bg-amber-400 text-black">
                 {pendingCallsCount}
               </span>
             )}
           </button>
-
-          <button
-            onClick={() => onSelectView('manager')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-              currentView === 'manager'
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25'
-                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Analytics</span>
-          </button>
-
-          <button
-            onClick={() => onSelectView('qr_station')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-              currentView === 'qr_station'
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25'
-                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>Table QRs</span>
-          </button>
         </div>
 
-        {/* Right Controls */}
+        {/* Right Controls: Auth, Table Selector, Audio & Reset */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Table Selector Dropdown (when in guest view) */}
-          {currentView === 'guest' && (
+          {/* Table Selector Dropdown (when viewing customer mode) */}
+          {activeRole === 'customer' && (
             <div className="flex items-center gap-1 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60">
               <span className="text-[11px] text-slate-400">Table:</span>
               <select
@@ -183,8 +182,8 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             </div>
           )}
 
-          {/* Toggle Phone Frame button in Guest Mode */}
-          {currentView === 'guest' && (
+          {/* Toggle Phone Frame button in Customer Mode */}
+          {activeRole === 'customer' && (
             <button
               onClick={onTogglePhoneFrame}
               className={`p-1.5 rounded-lg text-xs border transition-colors ${
@@ -192,9 +191,20 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                   ? 'bg-orange-500/20 text-orange-300 border-orange-500/40'
                   : 'bg-slate-800/70 text-slate-400 border-slate-700 hover:text-white'
               }`}
-              title="Toggle Phone Frame Simulation"
+              title="Toggle Phone Frame View"
             >
               <Smartphone className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Customer History & Rewards trigger */}
+          {activeRole === 'customer' && currentUser && (
+            <button
+              onClick={onOpenCustomerHistory}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-colors"
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>{currentUser.loyaltyPoints || 120} pts</span>
             </button>
           )}
 
@@ -211,14 +221,43 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             )}
           </button>
 
+          {/* User Auth Profile / Login Button */}
+          {currentUser ? (
+            <div className="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700/80 rounded-xl px-2.5 py-1">
+              <span className="text-sm">{currentUser.avatar || '👤'}</span>
+              <div className="text-left">
+                <div className="text-xs font-bold text-white leading-tight truncate max-w-[90px]">
+                  {currentUser.name.split(' ')[0]}
+                </div>
+                <div className="text-[10px] text-amber-400 font-semibold uppercase leading-none">
+                  {currentUser.role}
+                </div>
+              </div>
+              <button
+                onClick={onLogout}
+                className="ml-1 p-1 text-slate-400 hover:text-red-400 transition-colors"
+                title="Log Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => onOpenAuth()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition-all active:scale-95"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Log In / Sign Up</span>
+            </button>
+          )}
+
           {/* Reset Demo State button */}
           <button
             onClick={onResetDemo}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/90 text-slate-300 hover:text-white text-xs border border-slate-700/60 transition-colors"
-            title="Reset system to fresh demo data"
+            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/90 text-slate-400 hover:text-white border border-slate-700/60 transition-colors"
+            title="Reset system demo data"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-            <span>Reset Demo</span>
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
