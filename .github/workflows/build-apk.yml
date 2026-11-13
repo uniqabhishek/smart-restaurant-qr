@@ -65,6 +65,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          gh release upload v1.0.0-demo release-output/RestoFlow-Demo.apk --clobber || \
           gh release create v1.0.0-demo release-output/RestoFlow-Demo.apk \
             --title "RestoFlow ONE • Android Demo APK (Pitch Package)" \
             --notes "### 🍽️ RestoFlow ONE — Standalone Android Demo APK
@@ -80,5 +81,4 @@ jobs:
              - **📱 Customer Dine-In Menu** (QR table ordering, bill splitting, waiter call)
 
           #### 🌐 Live Browser Demo:
-          https://uniqabhishek.github.io/smart-restaurant-qr/" \
-            --clobber
+          https://uniqabhishek.github.io/smart-restaurant-qr/"
